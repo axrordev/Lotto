@@ -3,7 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lotto.Data\Lotto.Data.csproj" />
+    <ProjectReference Include="..\Lotto.Domain\Lotto.Domain.csproj" />
+  </ItemGroup>
 
 </Project>
