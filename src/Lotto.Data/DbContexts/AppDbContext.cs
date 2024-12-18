@@ -1,48 +1,40 @@
 ﻿using Lotto.Domain.Entities;
 using Lotto.Domain.Entities.Advertisements;
 using Lotto.Domain.Entities.Games;
+using Lotto.Domain.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lotto.Data.DbContexts;
 
 public class AppDbContext : DbContext
 {
-    //public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)  {}
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseNpgsql("Server=localhost; Database=Lotto; Port=5432; User ID=postgres; Password=1001");
-    }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Advertisement> Advertisements { get; set; }
     public DbSet<AdvertisementView> AdvertisementViews { get; set; }
-    public DbSet<FootballGame> FootballGames { get; set; }
-    public DbSet<FootballGameResult> FootballGameResults { get; set; }
-    public DbSet<Game> Games { get; set; }
-    public DbSet<NumberGame> NumberGames { get; set; }
+    public DbSet<Football> Footballs { get; set; }
+    public DbSet<FootballResult> FootballResults { get; set; }
+    public DbSet<Number> Numbers { get; set; }
     public DbSet<PlayFootball> PlayFootballs { get; set; }
     public DbSet<PlayNumber> PlayNumbers { get; set; }
     public DbSet<Asset> Assets { get; set; }
-    public DbSet<Chat> Chats { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<User> Users { get; set; }
-    public DbSet<UserAccount> UserAccounts { get; set; }
+    public DbSet<UserRole> UsersRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Advertisement>().HasQueryFilter(ad => !ad.IsDeleted);
         modelBuilder.Entity<AdvertisementView>().HasQueryFilter(adView => !adView.IsDeleted);
-        modelBuilder.Entity<FootballGame>().HasQueryFilter(fg => !fg.IsDeleted);
-        modelBuilder.Entity<FootballGameResult>().HasQueryFilter(fgr => !fgr.IsDeleted);
-        modelBuilder.Entity<Game>().HasQueryFilter(game => !game.IsDeleted);
-        modelBuilder.Entity<NumberGame>().HasQueryFilter(ng => !ng.IsDeleted);
+        modelBuilder.Entity<Football>().HasQueryFilter(fg => !fg.IsDeleted);
+        modelBuilder.Entity<FootballResult>().HasQueryFilter(fgr => !fgr.IsDeleted);
+        modelBuilder.Entity<Number>().HasQueryFilter(ng => !ng.IsDeleted);
         modelBuilder.Entity<PlayFootball>().HasQueryFilter(pf => !pf.IsDeleted);
         modelBuilder.Entity<PlayNumber>().HasQueryFilter(pn => !pn.IsDeleted);
         modelBuilder.Entity<Asset>().HasQueryFilter(asset => !asset.IsDeleted);
-        modelBuilder.Entity<Chat>().HasQueryFilter(chat => !chat.IsDeleted);
         modelBuilder.Entity<Transaction>().HasQueryFilter(transaction => !transaction.IsDeleted);
         modelBuilder.Entity<User>().HasQueryFilter(user => !user.IsDeleted);
-        modelBuilder.Entity<UserAccount>().HasQueryFilter(userAccount => !userAccount.IsDeleted);
+        modelBuilder.Entity<UserRole>().HasQueryFilter(userRole => !userRole.IsDeleted);
 
         #region FluentApi
         // Ad vs File 
@@ -64,22 +56,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(adView => adView.UserId);
 
         // FootballGameResult vs FootballGame 
-        modelBuilder.Entity<FootballGameResult>()
-            .HasOne(fgr => fgr.FootballGame)
+        modelBuilder.Entity<FootballResult>()
+            .HasOne(fgr => fgr.Football)
             .WithMany()
-            .HasForeignKey(fgr => fgr.FootballGameId);
+            .HasForeignKey(fgr => fgr.FootballId);
 
         // FootballGameResult vs FootballGame 
-        modelBuilder.Entity<FootballGameResult>()
-            .HasOne(fgr => fgr.FootballGame)
+        modelBuilder.Entity<FootballResult>()
+            .HasOne(fgr => fgr.Football)
             .WithMany()
-            .HasForeignKey(fgr => fgr.FootballGameId);
-
-        // Game vs Image 
-        modelBuilder.Entity<Game>()
-            .HasOne(game => game.Image)
-            .WithMany()
-            .HasForeignKey(game => game.ImageId);
+            .HasForeignKey(fgr => fgr.FootballId);
 
         // PlayFootball vs User 
         modelBuilder.Entity<PlayFootball>()
@@ -90,9 +76,9 @@ public class AppDbContext : DbContext
 
         // PlayFootball vs FootballGame 
         modelBuilder.Entity<PlayFootball>()
-            .HasOne(pf => pf.FootballGame)
+            .HasOne(pf => pf.Football)
             .WithMany()
-            .HasForeignKey(pf => pf.FootballGameId);
+            .HasForeignKey(pf => pf.FootballId);
 
         // PlayNumber vs User 
         modelBuilder.Entity<PlayNumber>()
@@ -102,15 +88,9 @@ public class AppDbContext : DbContext
 
         // PlayNumber vs NumberGame 
         modelBuilder.Entity<PlayNumber>()
-            .HasOne(pn => pn.NumberGame)
+            .HasOne(pn => pn.Number)
             .WithMany()
-            .HasForeignKey(pn => pn.NumberGameId);
-
-        // Chat vs File 
-        modelBuilder.Entity<Chat>()
-            .HasOne(chat => chat.File)
-            .WithMany()
-            .HasForeignKey(chat => chat.FileId);
+            .HasForeignKey(pn => pn.NumberId);
 
         // Transaction vs User 
         modelBuilder.Entity<Transaction>()
@@ -118,13 +98,20 @@ public class AppDbContext : DbContext
             .WithMany(u => u.Transactions)
             .HasForeignKey(t => t.UserId);
 
-        // User vs UserAccount
         modelBuilder.Entity<User>()
-            .HasOne(u => u.UserAccount)
+            .HasOne(u => u.Role)
             .WithMany()
-            .HasForeignKey(t => t.UserAccountId);
+            .HasForeignKey(t => t.RoleId);
 
+        modelBuilder.Entity<PlayFootball>()
+            .HasOne(pf => pf.User)
+            .WithMany(u => u.PlayFootballs)
+            .HasForeignKey(t => t.UserId);
 
+        modelBuilder.Entity<PlayNumber>()
+            .HasOne(pn => pn.User)
+            .WithMany(u => u.PlayNumbers)
+            .HasForeignKey(t => t.UserId);
         #endregion
     }
 }

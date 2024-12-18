@@ -84,10 +84,5 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Auditabl
 
         return query;
     }
-
-    public async ValueTask<bool> SaveAsync()
-    {
-        return await context.SaveChangesAsync() > 0;
-    }
 }
 

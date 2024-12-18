@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Planner.Service.Exceptions;
+namespace Lotto.Service.Exceptions;
 
 public class ForbiddenException : Exception
 {

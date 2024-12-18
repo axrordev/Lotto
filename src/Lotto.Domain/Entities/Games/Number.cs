@@ -2,9 +2,10 @@
 
 namespace Lotto.Domain.Entities.Games;
 
-public class NumberGame : Auditable
+public class Number : Auditable
 {
-    public int TotalCountOfNumbers { get; set; }
     public List<int> WinningNumbers { get; set; } = new List<int>();
     public TimeSpan Deadline { get; set; }
+    public decimal Amount { get; set; }
+    public bool IsCompleted { get; set; }
 }

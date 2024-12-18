@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Lotto.Data\Lotto.Data.csproj" />
     <ProjectReference Include="..\Lotto.Domain\Lotto.Domain.csproj" />
+	  <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

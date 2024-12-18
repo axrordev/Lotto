@@ -3,43 +3,25 @@ using Lotto.Data.Repositories;
 using Lotto.Domain.Entities;
 using Lotto.Domain.Entities.Advertisements;
 using Lotto.Domain.Entities.Games;
+using Lotto.Domain.Entities.Users;
 
 namespace Lotto.Data.UnitOfWorks;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(AppDbContext context) : IUnitOfWork
 {
-    private readonly AppDbContext context;
-    public UnitOfWork(AppDbContext context)
-    {
-        this.context = context;
-        UserRepository = new Repository<User>(context);
-        AssetRepository = new Repository<Asset>(context);
-        AdvertisementRepository = new Repository<Advertisement>(context);
-        AdvertisementViewRepository = new Repository<AdvertisementView>(context);
-        FootballGameRepository = new Repository<FootballGame>(context);
-        FootballGameResultRepository = new Repository<FootballGameResult>(context);
-        GameRepository = new Repository<Game>(context);
-        NumberGameRepository = new Repository<NumberGame>(context);
-        PlayFootballRepository = new Repository<PlayFootball>(context);
-        PlayNumberRepository = new Repository<PlayNumber>(context);
-        ChatRepository = new Repository<Chat>(context);
-        TransactionRepository = new Repository<Transaction>(context);
-    }
+    private readonly AppDbContext context = context;
 
-    public IRepository<User> UserRepository { get; }
-    public IRepository<Asset> AssetRepository { get; }
-    public IRepository<Advertisement> AdvertisementRepository { get; }
-    public IRepository<AdvertisementView> AdvertisementViewRepository { get; }
-    public IRepository<FootballGame> FootballGameRepository { get; }
-    public IRepository<FootballGameResult> FootballGameResultRepository { get; }
-    public IRepository<Game> GameRepository { get; }
-    public IRepository<NumberGame> NumberGameRepository { get; }
-    public IRepository<PlayFootball> PlayFootballRepository { get; }
-    public IRepository<PlayNumber> PlayNumberRepository { get; }
-    public IRepository<Chat> ChatRepository { get; }
-    public IRepository<Transaction> TransactionRepository { get; }
-
-
+    public IRepository<User> UserRepository { get; } = new Repository<User>(context);
+    public IRepository<Asset> AssetRepository { get; } = new Repository<Asset>(context);
+    public IRepository<Advertisement> AdvertisementRepository { get; } = new Repository<Advertisement>(context);
+    public IRepository<AdvertisementView> AdvertisementViewRepository { get; } = new Repository<AdvertisementView>(context);
+    public IRepository<Football> FootballRepository { get; } = new Repository<Football>(context);
+    public IRepository<FootballResult> FootballResultRepository { get; } = new Repository<FootballResult>(context);
+    public IRepository<Number> NumberRepository { get; } = new Repository<Number>(context);
+    public IRepository<PlayFootball> PlayFootballRepository { get; } = new Repository<PlayFootball>(context);
+    public IRepository<PlayNumber> PlayNumberRepository { get; } = new Repository<PlayNumber>(context);
+    public IRepository<Transaction> TransactionRepository { get; } = new Repository<Transaction>(context);
+    public IRepository<UserRole> UserRoleRepository { get; } = new Repository<UserRole>(context);
 
 
 

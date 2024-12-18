@@ -18,7 +18,4 @@ public interface IRepository<TEntity> where TEntity : Auditable
         Expression<Func<TEntity, bool>> expression = null,
         string[] includes = null,
         bool isTracked = true);
-
-    ValueTask<bool> SaveAsync();
 }
-

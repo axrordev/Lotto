@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Planner.Service.Exceptions;
+namespace Lotto.Service.Exceptions;
 
 public class AlreadyExistException : Exception
 {
@@ -11,4 +11,3 @@ public class AlreadyExistException : Exception
     public int StatusCode => 409;
 
 }
- 
