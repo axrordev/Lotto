@@ -2,7 +2,8 @@
 
 namespace Lotto.Domain.Entities.Users;
 
-public class UserRole : Auditable
+public enum UserRole
 {
-    public string Name { get; set; }
+    Admin,
+    User
 }
