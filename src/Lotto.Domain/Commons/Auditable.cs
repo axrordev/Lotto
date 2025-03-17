@@ -1,4 +1,4 @@
-﻿namespace Telegram.Domain.Commons;
+﻿namespace Lotto.Domain.Commons;
 
 public class Auditable
 {

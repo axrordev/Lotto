@@ -1,7 +1,7 @@
 ﻿using Lotto.Data.DbContexts;
+using Lotto.Domain.Commons;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Telegram.Domain.Commons;
 
 namespace Lotto.Data.Repositories;
 
@@ -52,9 +52,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Auditabl
     }
 
     public async ValueTask<IEnumerable<TEntity>> SelectAsEnumerableAsync(
-        Expression<Func<TEntity, bool>> expression = null,
-        string[] includes = null,
-        bool isTracked = true)
+    Expression<Func<TEntity, bool>> expression = null,
+    string[] includes = null,
+    bool isTracked = true)
     {
         var query = expression is null ? set : set.Where(expression);
 
@@ -63,7 +63,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Auditabl
                 query = query.Include(include);
 
         if (!isTracked)
-            query.AsNoTracking();
+            query = query.AsNoTracking(); 
 
         return await query.ToListAsync();
     }
@@ -80,7 +80,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Auditabl
                 query = query.Include(include);
 
         if (!isTracked)
-            query.AsNoTracking();
+            query = query.AsNoTracking();
 
         return query;
     }

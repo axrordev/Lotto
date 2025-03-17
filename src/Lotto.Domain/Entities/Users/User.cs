@@ -1,9 +1,8 @@
-﻿using Lotto.Domain.Entities.Advertisements;
+﻿using Lotto.Domain.Commons;
+using Lotto.Domain.Entities.Advertisements;
 using Lotto.Domain.Entities.Games;
-using Lotto.Domain.Entities.Users;
-using Telegram.Domain.Commons;
 
-namespace Lotto.Domain.Entities;
+namespace Lotto.Domain.Entities.Users;
 
 public class User : Auditable
 {
@@ -14,7 +13,7 @@ public class User : Auditable
     public UserRole Role { get; set; }
     public decimal Balance { get; set; }
     public bool IsBlocked { get; set; }
-    public ICollection<Transaction> Transactions { get; set; }
+    public DateTime? LastCommentTime { get; set; }
     public ICollection<PlayFootball> PlayFootballs { get; set; }
     public ICollection<PlayNumber> PlayNumbers { get; set; }
 }

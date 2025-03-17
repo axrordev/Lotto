@@ -1,4 +1,4 @@
-﻿using Telegram.Domain.Commons;
+﻿using Lotto.Domain.Commons;
 
 namespace Lotto.Domain.Entities;
 

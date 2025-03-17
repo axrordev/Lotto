@@ -17,10 +17,13 @@ public class AppDbContext : DbContext
     public DbSet<Number> Numbers { get; set; }
     public DbSet<PlayFootball> PlayFootballs { get; set; }
     public DbSet<PlayNumber> PlayNumbers { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<CommentSetting> CommentSettings { get; set; }
     public DbSet<Asset> Assets { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UsersRoles { get; set; }
+    public DbSet<UserRolePermission> UserRolePermissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,17 +34,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Number>().HasQueryFilter(ng => !ng.IsDeleted);
         modelBuilder.Entity<PlayFootball>().HasQueryFilter(pf => !pf.IsDeleted);
         modelBuilder.Entity<PlayNumber>().HasQueryFilter(pn => !pn.IsDeleted);
+        modelBuilder.Entity<Comment>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<Asset>().HasQueryFilter(asset => !asset.IsDeleted);
-        modelBuilder.Entity<Transaction>().HasQueryFilter(transaction => !transaction.IsDeleted);
         modelBuilder.Entity<User>().HasQueryFilter(user => !user.IsDeleted);
+        modelBuilder.Entity<Permission>().HasQueryFilter(entity => !entity.IsDeleted);
         modelBuilder.Entity<UserRole>().HasQueryFilter(userRole => !userRole.IsDeleted);
+        modelBuilder.Entity<UserRolePermission>().HasQueryFilter(entity => !entity.IsDeleted);
 
         #region FluentApi
-        // Ad vs File 
-        modelBuilder.Entity<Advertisement>()
-            .HasOne(ad => ad.File)
-            .WithMany()
-            .HasForeignKey(ad => ad.FileId);
 
         // Ad vs AdView 
         modelBuilder.Entity<AdvertisementView>()
@@ -55,11 +55,11 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(adView => adView.UserId);
 
-        // FootballGameResult vs FootballGame 
+        // FootballResult vs FootballGame 
         modelBuilder.Entity<FootballResult>()
-            .HasOne(fgr => fgr.Football)
+            .HasOne(fr => fr.Football)
             .WithMany()
-            .HasForeignKey(fgr => fgr.FootballId);
+            .HasForeignKey(fr => fr.FootballId);
 
         // FootballGameResult vs FootballGame 
         modelBuilder.Entity<FootballResult>()
@@ -92,12 +92,6 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(pn => pn.NumberId);
 
-        // Transaction vs User 
-        modelBuilder.Entity<Transaction>()
-            .HasOne(t => t.User)
-            .WithMany(u => u.Transactions)
-            .HasForeignKey(t => t.UserId);
-
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
             .WithMany()
@@ -111,6 +105,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PlayNumber>()
             .HasOne(pn => pn.User)
             .WithMany(u => u.PlayNumbers)
+            .HasForeignKey(t => t.UserId);
+
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.User)
+            .WithMany()
             .HasForeignKey(t => t.UserId);
         #endregion
     }

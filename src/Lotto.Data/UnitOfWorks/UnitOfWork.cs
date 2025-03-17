@@ -20,9 +20,11 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     public IRepository<Number> NumberRepository { get; } = new Repository<Number>(context);
     public IRepository<PlayFootball> PlayFootballRepository { get; } = new Repository<PlayFootball>(context);
     public IRepository<PlayNumber> PlayNumberRepository { get; } = new Repository<PlayNumber>(context);
-    public IRepository<Transaction> TransactionRepository { get; } = new Repository<Transaction>(context);
+    public IRepository<Comment> CommentRepository { get; } = new Repository<Comment>(context);
+    public IRepository<CommentSetting> CommentSettingRepository { get; } = new Repository<CommentSetting>(context);
+    public IRepository<Permission> PermissionRepository { get; } = new Repository<Permission>(context);
     public IRepository<UserRole> UserRoleRepository { get; } = new Repository<UserRole>(context);
-
+    public IRepository<UserRolePermission> UserRolePermissionRepository { get; } = new Repository<UserRolePermission>(context);
 
 
     public async ValueTask BeginTransactionAsync()

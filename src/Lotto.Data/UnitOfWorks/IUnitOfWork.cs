@@ -17,8 +17,12 @@ public interface IUnitOfWork : IDisposable
     IRepository<Number> NumberRepository { get; }
     IRepository<PlayFootball> PlayFootballRepository { get; }
     IRepository<PlayNumber> PlayNumberRepository { get; }
-    IRepository<Transaction> TransactionRepository { get; }
+    IRepository<Comment> CommentRepository { get; }
+    IRepository<CommentSetting> CommentSettingRepository { get; }
     IRepository<UserRole> UserRoleRepository { get; }
+    IRepository<UserRolePermission> UserRolePermissionRepository { get; }
+    IRepository<Permission> PermissionRepository { get; }
+
 
     ValueTask<bool> SaveAsync();
     ValueTask BeginTransactionAsync();

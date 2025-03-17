@@ -1,4 +1,5 @@
-﻿using Telegram.Domain.Commons;
+﻿using Lotto.Domain.Commons;
+using Lotto.Domain.Entities.Users;
 
 namespace Lotto.Domain.Entities.Advertisements;
 

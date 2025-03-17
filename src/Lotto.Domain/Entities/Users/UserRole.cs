@@ -1,9 +1,8 @@
-﻿using Telegram.Domain.Commons;
+﻿using Lotto.Domain.Commons;
 
 namespace Lotto.Domain.Entities.Users;
 
-public enum UserRole
+public class UserRole : Auditable
 {
-    Admin,
-    User
+    public string Name { get; set; }
 }

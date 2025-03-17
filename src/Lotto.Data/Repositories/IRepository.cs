@@ -1,5 +1,5 @@
-﻿using System.Linq.Expressions;
-using Telegram.Domain.Commons;
+﻿using Lotto.Domain.Commons;
+using System.Linq.Expressions;
 
 namespace Lotto.Data.Repositories;
 

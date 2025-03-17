@@ -4,6 +4,3 @@ public interface IAdvertisementViewService
 {
 
 }
-public class AdvertisementViewService
-{
-}
