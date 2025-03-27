@@ -52,11 +52,11 @@ namespace Lotto.Data.Migrations
                     b.Property<string>("FileUrl")
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
@@ -680,7 +680,7 @@ namespace Lotto.Data.Migrations
             modelBuilder.Entity("Lotto.Domain.Entities.Advertisements.AdvertisementView", b =>
                 {
                     b.HasOne("Lotto.Domain.Entities.Advertisements.Advertisement", "Advertisement")
-                        .WithMany()
+                        .WithMany("Views")
                         .HasForeignKey("AdvertisementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -784,6 +784,11 @@ namespace Lotto.Data.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("UserRole");
+                });
+
+            modelBuilder.Entity("Lotto.Domain.Entities.Advertisements.Advertisement", b =>
+                {
+                    b.Navigation("Views");
                 });
 
             modelBuilder.Entity("Lotto.Domain.Entities.Users.User", b =>

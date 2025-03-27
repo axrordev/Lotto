@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lotto.WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SetCommentCoolDownController(ICommentSettingService commentSettingService) : ControllerBase
+    public class SetCommentCoolDownController(ICommentSettingService commentSettingService) : BaseController
     {
         [Authorize(Roles = "admin")] // 📌 Faqat adminlar o'zgartira olishi kerak
         [HttpPut("set-comment-cooldown")]

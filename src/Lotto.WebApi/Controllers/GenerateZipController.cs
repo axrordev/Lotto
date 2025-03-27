@@ -7,9 +7,7 @@ using Lotto.Service.Helpers;
 
 namespace Lotto.WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class GenerateZipController : ControllerBase
+    public class GenerateZipController : BaseController
     {
         /*
         [HttpPost("generate-zip/{gameId}")]

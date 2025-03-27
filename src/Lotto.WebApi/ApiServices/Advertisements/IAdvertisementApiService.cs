@@ -1,6 +1,19 @@
-﻿namespace Lotto.WebApi.ApiServices.Advertisements
+﻿using Lotto.Domain.Entities.Advertisements;
+using Lotto.Service.Configurations;
+using Lotto.WebApi.Models.Advertisements;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Lotto.WebApi.ApiServices.Advertisements;
+
+public interface IAdvertisementApiService
 {
-    public interface IAdvertisementApiService
-    {
-    }
+    //ValueTask<string> UploadFileAsync(IFormFile file);
+    ValueTask<AdvertisementViewModel> CreateAsync(AdvertisementCreateModel createModel, IFormFile file);
+    ValueTask LogAdvertisementViewASync(long userId, long adId);
+    ValueTask<AdvertisementViewModel> UpdateAsync(long id, AdvertisementUpdateModel updateModel);
+    ValueTask<bool> DeleteAsync(long id);
+    ValueTask<AdvertisementViewModel> GetByIdAsync(long id);
+    ValueTask<IEnumerable<AdvertisementViewModel>> GetAllAsync(PaginationParams @params, Filter filter);
 }

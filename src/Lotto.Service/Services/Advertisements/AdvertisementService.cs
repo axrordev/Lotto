@@ -7,64 +7,72 @@ using Lotto.Service.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Lotto.Service.Helpers;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Lotto.Service.Services.Advertisements;
 
-public class AdvertisementService(IUnitOfWork unitOfWork, IWebHostEnvironment _env) : IAdvertisementService
+public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementService
 {
     // Umumiy fayl yuklash funksiyasi
-    public async ValueTask<string> UploadFileAsync(IFormFile file, string fileType)
+    public async ValueTask<string> UploadFileAsync(IFormFile file)
     {
         if (file == null || file.Length == 0)
             throw new ArgumentException("Invalid file.");
 
-        // Ruxsat etilgan fayl formatlari
-        var allowedExtensions = fileType.ToLower() switch
-        {
-            "video" => new[] { ".mp4", ".mov" },
-            "image" => new[] { ".jpg", ".jpeg", ".png", ".gif" },
-            _ => throw new ArgumentException("Unsupported file type.")
-        };
+         var path = Path.Combine(FilePathHelper.WwwrootPath);
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
 
+        // `_env.WebRootPath` ni tekshiramiz va sozlaymiz
+        //if (string.IsNullOrEmpty(_env.WebRootPath))
+        //    _env.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+        //if (!Directory.Exists(_env.WebRootPath))
+        //    Directory.CreateDirectory(_env.WebRootPath);
+
+        // Fayl kengaytmasini olish
         string fileExtension = Path.GetExtension(file.FileName).ToLower();
+        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+        var videoExtensions = new[] { ".mp4", ".mov" };
 
-        if (!allowedExtensions.Contains(fileExtension))
-            throw new ArgumentException($"Invalid file extension. Allowed: {string.Join(", ", allowedExtensions)}");
+        string folderName;
+        if (imageExtensions.Contains(fileExtension))
+            folderName = "images";
+        else if (videoExtensions.Contains(fileExtension))
+            folderName = "videos";
+        else
+            throw new ArgumentException("Unsupported file type.");
 
-        // Maksimal hajm tekshiruvi (50MB video, 5MB rasm)
-        long maxSize = fileType == "video" ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+        long maxSize = folderName == "videos" ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
         if (file.Length > maxSize)
             throw new ArgumentException($"File is too large. Max size: {(maxSize / (1024 * 1024))}MB");
 
-        // Faylni saqlash uchun papka
-        string folderName = fileType == "video" ? "videos" : "images";
-        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", folderName);
-    
+        // Faylni saqlash papkasini yaratish
+        string uploadsFolder = Path.Combine(path, "uploads", folderName);
         if (!Directory.Exists(uploadsFolder))
             Directory.CreateDirectory(uploadsFolder);
 
-        // Fayl nomini yaratish
+        // Faylni saqlash
         string uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        // Faylni saqlash
+    
         using (var fileStream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(fileStream);
         }
 
-        // **Frontend va backend ajratilgan bo'lsa, absolute URL qaytish kerak**
-        string fileUrl = $"/uploads/{folderName}/{uniqueFileName}";
-        return fileUrl;
+        return $"/uploads/{folderName}/{uniqueFileName}";
     }
 
 
-    public async ValueTask<Advertisement> CreateAsync(Advertisement advertisement, IFormFile? file = null, string? fileType = null)
+
+    public async ValueTask<Advertisement> CreateAsync(Advertisement advertisement, IFormFile? file = null)
     {
         // 📌 Agar fayl berilgan bo‘lsa, yuklab, URL'ni olish
-        if (file != null && !string.IsNullOrWhiteSpace(fileType))
+        if (file != null)
         {
-            string fileUrl = await UploadFileAsync(file, fileType);
+            string fileUrl = await UploadFileAsync(file);
             advertisement.FileUrl = fileUrl;
         }
 
@@ -103,7 +111,6 @@ public class AdvertisementService(IUnitOfWork unitOfWork, IWebHostEnvironment _e
         existingAd.Title = advertisement.Title;
         existingAd.Content = advertisement.Content;
         existingAd.Url = advertisement.Url;
-        existingAd.StartDate = advertisement.StartDate;
         existingAd.EndDate = advertisement.EndDate;
         existingAd.UpdatedAt = DateTime.UtcNow;
 
@@ -121,5 +128,24 @@ public class AdvertisementService(IUnitOfWork unitOfWork, IWebHostEnvironment _e
         await unitOfWork.SaveAsync();
 
         return true;
+    }
+
+    public async ValueTask LogAdvertisementViewASync(long userId, long adId)
+    {
+        var exists = await unitOfWork.AdvertisementViewRepository
+            .SelectAsync(av => av.UserId == userId && av.AdvertisementId == adId);
+
+        if (exists == null) // Bir kishi bir reklamani bir marta ko‘rsa yoziladi
+        {
+            var adView = new AdvertisementView
+            {
+                UserId = userId,
+                AdvertisementId = adId,
+                ViewedAt = DateTime.UtcNow
+            };
+
+            await unitOfWork.AdvertisementViewRepository.InsertAsync(adView);
+            await unitOfWork.SaveAsync();
+        }
     }
 }

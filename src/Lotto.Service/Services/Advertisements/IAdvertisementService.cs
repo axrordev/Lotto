@@ -6,8 +6,9 @@ namespace Lotto.Service.Services.Advertisements;
 
 public interface IAdvertisementService
 {
-    ValueTask<string> UploadFileAsync(IFormFile file, string fileType);
-    ValueTask<Advertisement> CreateAsync(Advertisement advertisement, IFormFile file, string fileType);
+    ValueTask<string> UploadFileAsync(IFormFile file);
+    ValueTask<Advertisement> CreateAsync(Advertisement advertisement, IFormFile file);
+    ValueTask LogAdvertisementViewASync(long userId, long adId);
     ValueTask<Advertisement> UpdateAsync(long id, Advertisement advertisement);
     ValueTask<bool> DeleteAsync(long id);
     ValueTask<Advertisement> GetByIdAsync(long id);

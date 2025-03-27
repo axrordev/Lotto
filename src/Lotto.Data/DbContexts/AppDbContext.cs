@@ -45,9 +45,9 @@ public class AppDbContext : DbContext
 
         // Ad vs AdView 
         modelBuilder.Entity<AdvertisementView>()
-            .HasOne(adView => adView.Advertisement)
-            .WithMany()
-            .HasForeignKey(adView => adView.AdvertisementId);
+            .HasOne(av => av.Advertisement)
+            .WithMany(a => a.Views)
+            .HasForeignKey(av => av.AdvertisementId);
 
         // AdView vs User 
         modelBuilder.Entity<AdvertisementView>()
