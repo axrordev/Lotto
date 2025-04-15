@@ -11,11 +11,11 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Advertisement> Advertisements { get; set; }
-    public DbSet<AdvertisementView> AdvertisementViews { get; set; }
     public DbSet<Football> Footballs { get; set; }
     public DbSet<FootballResult> FootballResults { get; set; }
-    public DbSet<Number> Numbers { get; set; }
     public DbSet<PlayFootball> PlayFootballs { get; set; }
+    public DbSet<Number> Numbers { get; set; }
+    public DbSet<Announcement> Announcements { get; set; }
     public DbSet<PlayNumber> PlayNumbers { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentSetting> CommentSettings { get; set; }
@@ -28,7 +28,6 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Advertisement>().HasQueryFilter(ad => !ad.IsDeleted);
-        modelBuilder.Entity<AdvertisementView>().HasQueryFilter(adView => !adView.IsDeleted);
         modelBuilder.Entity<Football>().HasQueryFilter(fg => !fg.IsDeleted);
         modelBuilder.Entity<FootballResult>().HasQueryFilter(fgr => !fgr.IsDeleted);
         modelBuilder.Entity<Number>().HasQueryFilter(ng => !ng.IsDeleted);
@@ -42,18 +41,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserRolePermission>().HasQueryFilter(entity => !entity.IsDeleted);
 
         #region FluentApi
-
-        // Ad vs AdView 
-        modelBuilder.Entity<AdvertisementView>()
-            .HasOne(av => av.Advertisement)
-            .WithMany(a => a.Views)
-            .HasForeignKey(av => av.AdvertisementId);
-
-        // AdView vs User 
-        modelBuilder.Entity<AdvertisementView>()
-            .HasOne(adView => adView.User)
-            .WithMany()
-            .HasForeignKey(adView => adView.UserId);
+        modelBuilder.Entity<Advertisement>()
+            .Property(a => a.EndDate)
+            .HasColumnType("timestamp with time zone");
 
         // FootballResult vs FootballGame 
         modelBuilder.Entity<FootballResult>()

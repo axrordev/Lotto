@@ -62,13 +62,13 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
     public async ValueTask<User> GetAsync(long id)
     {
         return await unitOfWork.UserRepository
-            .SelectAsync(expression: user => user.Id == id, includes: new[] { "Role", "PlayFootball", "PlayNumber" })
+            .SelectAsync(expression: user => user.Id == id, includes: new[] { "Role"})
             ?? throw new NotFoundException("This user is not found");
     }
 
     public async ValueTask<IEnumerable<User>> GetAllAsync(PaginationParams @params, Filter filter)
     {
-        var users = unitOfWork.UserRepository.SelectAsQueryable(includes: new[] { "Role", "PlayFootball", "PlayNumber" });
+        var users = unitOfWork.UserRepository.SelectAsQueryable(includes: new[] { "Role" });
 
         return await users.ToPaginateAsQueryable(@params).OrderBy(filter).ToListAsync();
     }
@@ -109,7 +109,7 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
     public async ValueTask<IEnumerable<User>> GetAllAsync()
     {
         return await unitOfWork.UserRepository
-            .SelectAsEnumerableAsync(includes: new[] { "Role", "PlayFootball", "PlayNumber" });
+            .SelectAsEnumerableAsync(includes: new[] {"Role" });
     }
 
 }

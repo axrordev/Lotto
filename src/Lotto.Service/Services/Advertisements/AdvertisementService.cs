@@ -17,19 +17,9 @@ public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementServic
     // Umumiy fayl yuklash funksiyasi
     public async ValueTask<string> UploadFileAsync(IFormFile file)
     {
-        if (file == null || file.Length == 0)
-            throw new ArgumentException("Invalid file.");
-
          var path = Path.Combine(FilePathHelper.WwwrootPath);
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-
-        // `_env.WebRootPath` ni tekshiramiz va sozlaymiz
-        //if (string.IsNullOrEmpty(_env.WebRootPath))
-        //    _env.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-        //if (!Directory.Exists(_env.WebRootPath))
-        //    Directory.CreateDirectory(_env.WebRootPath);
 
         // Fayl kengaytmasini olish
         string fileExtension = Path.GetExtension(file.FileName).ToLower();
@@ -69,23 +59,50 @@ public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementServic
 
     public async ValueTask<Advertisement> CreateAsync(Advertisement advertisement, IFormFile? file = null)
     {
-        // 📌 Agar fayl berilgan bo‘lsa, yuklab, URL'ni olish
+        // 📌 Fayl yuklash
         if (file != null)
         {
-            string fileUrl = await UploadFileAsync(file);
-            advertisement.FileUrl = fileUrl;
+            try
+            {
+                string fileUrl = await UploadFileAsync(file);
+                advertisement.FileUrl = fileUrl;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Fayl yuklashda xatolik yuz berdi.", ex);
+            }
         }
 
-        await unitOfWork.AdvertisementRepository.InsertAsync(advertisement);
-        await unitOfWork.SaveAsync();
+        // 📌 Biznes logika
+        advertisement.IsActive = true;
+        if (advertisement.EndDate <= DateTime.UtcNow)
+        {
+            throw new ArgumentException("Tugash sanasi kelajakda bo‘lishi kerak.", nameof(advertisement.EndDate));
+        }
 
-        return advertisement;
+        // 📌 Ma'lumotlarni saqlash
+        try
+        {
+            var ad = await unitOfWork.AdvertisementRepository.InsertAsync(advertisement);
+            await unitOfWork.SaveAsync();
+            return ad;
+        }
+        catch (Exception ex)
+        {
+            // 📌 Xato haqida batafsil ma'lumot
+            string errorMessage = ex.InnerException != null 
+                ? $"Ma'lumotlarni saqlashda xatolik: {ex.InnerException.Message}" 
+                : $"Ma'lumotlarni saqlashda xatolik: {ex.Message}";
+            throw new InvalidOperationException(errorMessage, ex);
+        }
     }
 
     public async ValueTask<IEnumerable<Advertisement>> GetAllAsync(PaginationParams @params, Filter filter)
     {
         var advertisements = unitOfWork.AdvertisementRepository
-            .SelectAsQueryable().OrderBy(filter);
+        .SelectAsQueryable()
+        .Where(a => a.IsActive) // Faqat faol reklamalar
+        .OrderBy(filter);
 
             // 📌 Paginatsiya
         var pagedAdvertisements = advertisements.ToPaginateAsQueryable(@params);
@@ -95,8 +112,8 @@ public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementServic
     public async ValueTask<Advertisement> GetByIdAsync(long id)
     {
         var advertisement = await unitOfWork.AdvertisementRepository
-            .SelectAsQueryable(a => a.Id == id)
-            .FirstOrDefaultAsync();
+        .SelectAsQueryable(a => a.Id == id && a.IsActive) // Faqat faol reklama
+        .FirstOrDefaultAsync();
 
         if(advertisement == null)
             throw new NotFoundException($"Advertisement with ID {id} not found.");
@@ -120,6 +137,22 @@ public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementServic
         return existingAd;
     }
 
+    public async ValueTask UpdateExpiredAdvertisementsAsync()
+    {
+        var expiredAds = await unitOfWork.AdvertisementRepository
+            .SelectAsQueryable(a => a.EndDate < DateTime.UtcNow && a.IsActive)
+            .ToListAsync();
+
+        foreach (var ad in expiredAds)
+        {
+            ad.IsActive = false;
+            ad.UpdatedAt = DateTime.UtcNow;
+            await unitOfWork.AdvertisementRepository.UpdateAsync(ad);
+        }
+
+        await unitOfWork.SaveAsync();
+    }
+
     public async ValueTask<bool> DeleteAsync(long id)
     {
         var advertisement = await GetByIdAsync(id);
@@ -130,22 +163,4 @@ public class AdvertisementService(IUnitOfWork unitOfWork) : IAdvertisementServic
         return true;
     }
 
-    public async ValueTask LogAdvertisementViewASync(long userId, long adId)
-    {
-        var exists = await unitOfWork.AdvertisementViewRepository
-            .SelectAsync(av => av.UserId == userId && av.AdvertisementId == adId);
-
-        if (exists == null) // Bir kishi bir reklamani bir marta ko‘rsa yoziladi
-        {
-            var adView = new AdvertisementView
-            {
-                UserId = userId,
-                AdvertisementId = adId,
-                ViewedAt = DateTime.UtcNow
-            };
-
-            await unitOfWork.AdvertisementViewRepository.InsertAsync(adView);
-            await unitOfWork.SaveAsync();
-        }
-    }
 }

@@ -3,9 +3,10 @@ using Lotto.Domain.Entities.Advertisements;
 using Lotto.Domain.Entities.Games;
 using Lotto.Domain.Entities.Users;
 using Lotto.WebApi.Models.Advertisements;
-using Lotto.WebApi.Models.AdvertisementViews;
+using Lotto.WebApi.Models.Footballs;
 using Lotto.WebApi.Models.Numbers;
 using Lotto.WebApi.Models.Permissions;
+using Lotto.WebApi.Models.PlayNumbers;
 using Lotto.WebApi.Models.UserRolePermissions;
 using Lotto.WebApi.Models.UserRoles;
 using Lotto.WebApi.Models.Users;
@@ -36,24 +37,35 @@ namespace Lotto.WebApi.MapperConfig
             CreateMap<UserRolePermission, UserRolePermissionViewModel>();
 
 
-
+            // Number
             CreateMap<Number, NumberViewModel>();
-            CreateMap<NumberCreateModel, Number>();
             CreateMap<NumberUpdateModel, Number>();
 
-             // 🔹 Advertisement Mapping
-        CreateMap<AdvertisementCreateModel, Advertisement>()
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
+            CreateMap<NumberCreateModel, Number>()
+                .ForMember(dest => dest.Deadline, opt => opt.MapFrom(src => src.Deadline))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.IsCompleted, opt => opt.Ignore());
 
-        CreateMap<AdvertisementUpdateModel, Advertisement>()
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+            CreateMap<PlayNumberCreateModel, PlayNumber>();
+            CreateMap<PlayNumber, PlayNumberViewModel>();
 
-        CreateMap<Advertisement, AdvertisementViewModel>()
-            .ForMember(dest => dest.File, opt => opt.Ignore()); // File ni API orqali yuborish uchun
 
-        // 🔹 AdvertisementView Mapping
-        CreateMap<AdvertisementView, AdvertisementViewViewModel>().ReverseMap();
+            //Advertisement
+            CreateMap<Advertisement, AdvertisementViewModel>();
+            CreateMap<AdvertisementCreateModel, Advertisement>();
+            CreateMap<AdvertisementUpdateModel, Advertisement>();
+
+
+            // Football
+            CreateMap<FootballCreateModel, Football>();
+            CreateMap<Football, FootballViewModel>();
+            CreateMap<PlayFootballCreateModel, PlayFootball>();
+            CreateMap<PlayFootball, PlayFootballViewModel>();
+            CreateMap<FootballResultCreateModel, FootballResult>();
+            CreateMap<FootballResult, FootballResultViewModel>();
+            CreateMap<GoalDetailCreateModel, GoalDetail>();
+            CreateMap<GoalDetail, GoalDetailViewModel>();
+
         }
     }
 }

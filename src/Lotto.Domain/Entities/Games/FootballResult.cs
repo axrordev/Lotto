@@ -8,6 +8,6 @@ public class FootballResult : Auditable
     public Football Football { get; set; }
     public int HomeTeamScore { get; set; }
     public int AwayTeamScore { get; set; }
-    public List<int> GoalTimes { get; set; } = new List<int>();
+    public List<GoalDetail> Goals { get; set; } = new List<GoalDetail>();
 }
                                                                                                

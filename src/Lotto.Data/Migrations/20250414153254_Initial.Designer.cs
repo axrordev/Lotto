@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lotto.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250327071736_initial")]
-    partial class initial
+    [Migration("20250414153254_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,16 +78,13 @@ namespace Lotto.Data.Migrations
                     b.ToTable("Advertisements");
                 });
 
-            modelBuilder.Entity("Lotto.Domain.Entities.Advertisements.AdvertisementView", b =>
+            modelBuilder.Entity("Lotto.Domain.Entities.Announcement", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("AdvertisementId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -101,8 +98,20 @@ namespace Lotto.Data.Migrations
                     b.Property<long?>("DeletedById")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -110,19 +119,9 @@ namespace Lotto.Data.Migrations
                     b.Property<long?>("UpdatedById")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("ViewedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AdvertisementId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AdvertisementViews");
+                    b.ToTable("Announcements");
                 });
 
             modelBuilder.Entity("Lotto.Domain.Entities.Asset", b =>
@@ -270,6 +269,9 @@ namespace Lotto.Data.Migrations
                     b.Property<long?>("DeletedById")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("FootballInfo")
+                        .HasColumnType("text");
+
                     b.Property<string>("HomeTeam")
                         .HasColumnType("text");
 
@@ -370,6 +372,9 @@ namespace Lotto.Data.Migrations
                     b.Property<long?>("DeletedById")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("EncryptedWinningNumbers")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
@@ -382,7 +387,7 @@ namespace Lotto.Data.Migrations
                     b.Property<long?>("UpdatedById")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("WinningNumbers")
+                    b.Property<string>("WinningNumbersHash")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -397,12 +402,6 @@ namespace Lotto.Data.Migrations
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("AdsWatched")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AttemptsLeft")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -454,12 +453,6 @@ namespace Lotto.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("AdsWatched")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AttemptsLeft")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -481,8 +474,8 @@ namespace Lotto.Data.Migrations
                     b.Property<long>("NumberId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("SelectedNumbers")
-                        .HasColumnType("text");
+                    b.Property<int[]>("SelectedNumbers")
+                        .HasColumnType("integer[]");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -680,25 +673,6 @@ namespace Lotto.Data.Migrations
                     b.ToTable("UserRolePermissions");
                 });
 
-            modelBuilder.Entity("Lotto.Domain.Entities.Advertisements.AdvertisementView", b =>
-                {
-                    b.HasOne("Lotto.Domain.Entities.Advertisements.Advertisement", "Advertisement")
-                        .WithMany("Views")
-                        .HasForeignKey("AdvertisementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Lotto.Domain.Entities.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Advertisement");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Lotto.Domain.Entities.Comment", b =>
                 {
                     b.HasOne("Lotto.Domain.Entities.Users.User", "User")
@@ -787,11 +761,6 @@ namespace Lotto.Data.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("UserRole");
-                });
-
-            modelBuilder.Entity("Lotto.Domain.Entities.Advertisements.Advertisement", b =>
-                {
-                    b.Navigation("Views");
                 });
 
             modelBuilder.Entity("Lotto.Domain.Entities.Users.User", b =>

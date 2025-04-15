@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Lotto.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,29 @@ namespace Lotto.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Advertisements", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Announcements",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    ExpiryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedById = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedById = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcements", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -89,6 +112,7 @@ namespace Lotto.Data.Migrations
                     HomeTeam = table.Column<string>(type: "text", nullable: true),
                     AwayTeam = table.Column<string>(type: "text", nullable: true),
                     MatchDay = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FootballInfo = table.Column<string>(type: "text", nullable: true),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -110,7 +134,8 @@ namespace Lotto.Data.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    WinningNumbers = table.Column<string>(type: "text", nullable: true),
+                    EncryptedWinningNumbers = table.Column<string>(type: "text", nullable: true),
+                    WinningNumbersHash = table.Column<string>(type: "text", nullable: true),
                     Deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -263,40 +288,6 @@ namespace Lotto.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AdvertisementViews",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    AdvertisementId = table.Column<long>(type: "bigint", nullable: false),
-                    ViewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedById = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedById = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AdvertisementViews", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AdvertisementViews_Advertisements_AdvertisementId",
-                        column: x => x.AdvertisementId,
-                        principalTable: "Advertisements",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AdvertisementViews_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
                 {
@@ -333,8 +324,6 @@ namespace Lotto.Data.Migrations
                     FootballId = table.Column<long>(type: "bigint", nullable: false),
                     GoalTime = table.Column<int>(type: "integer", nullable: false),
                     IsWinner = table.Column<bool>(type: "boolean", nullable: false),
-                    AttemptsLeft = table.Column<int>(type: "integer", nullable: false),
-                    AdsWatched = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -368,10 +357,8 @@ namespace Lotto.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     NumberId = table.Column<long>(type: "bigint", nullable: false),
-                    SelectedNumbers = table.Column<string>(type: "text", nullable: true),
+                    SelectedNumbers = table.Column<int[]>(type: "integer[]", nullable: true),
                     IsWinner = table.Column<bool>(type: "boolean", nullable: false),
-                    AttemptsLeft = table.Column<int>(type: "integer", nullable: false),
-                    AdsWatched = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -396,16 +383,6 @@ namespace Lotto.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AdvertisementViews_AdvertisementId",
-                table: "AdvertisementViews",
-                column: "AdvertisementId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AdvertisementViews_UserId",
-                table: "AdvertisementViews",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_UserId",
@@ -457,7 +434,10 @@ namespace Lotto.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AdvertisementViews");
+                name: "Advertisements");
+
+            migrationBuilder.DropTable(
+                name: "Announcements");
 
             migrationBuilder.DropTable(
                 name: "Assets");
@@ -479,9 +459,6 @@ namespace Lotto.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRolePermissions");
-
-            migrationBuilder.DropTable(
-                name: "Advertisements");
 
             migrationBuilder.DropTable(
                 name: "Footballs");

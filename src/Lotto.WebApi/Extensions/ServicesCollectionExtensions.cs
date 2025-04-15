@@ -29,6 +29,8 @@ using Lotto.WebApi.ApiServices.Permissions;
 using Lotto.WebApi.ApiServices.UserRoles;
 using Lotto.WebApi.ApiServices.UserRolePermissions;
 using Microsoft.Extensions.Logging;
+using Lotto.Service.Services.Footballs;
+using Lotto.WebApi.ApiServices.Footballs;
 
 
 namespace Lotto.WebApi.Extensions
@@ -38,8 +40,8 @@ namespace Lotto.WebApi.Extensions
         public static void AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IAdvertisementService, AdvertisementService>();
-         //   services.AddScoped<INumberService, NumberService>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<INumberService, NumberService>();
+            services.AddScoped<IFootballService, FootballService>();
 
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
@@ -47,13 +49,15 @@ namespace Lotto.WebApi.Extensions
             services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddScoped<IUserRolePermissionService, UserRolePermissionService>();
 
-           // services.AddScoped<ZipService>(provider => new ZipService(configuration["WwwRootPath"]));
+           
    
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         public static void AddApiServices(this IServiceCollection services)
         {
             services.AddScoped<INumberApiService, NumberApiService>();
+            services.AddScoped<IFootballApiService, FootballApiService>();
             services.AddScoped<IAdvertisementApiService, AdvertisementApiService>();
 
             services.AddScoped<IAccountApiService, AccountApiService>();
@@ -64,10 +68,7 @@ namespace Lotto.WebApi.Extensions
         }
 
         public static void AddExceptions(this IServiceCollection services)
-        {     
-            FilePathHelper.WwwrootPath = Path.GetFullPath("wwwroot");
-
-
+        {
             services.AddExceptionHandler<NotFoundExceptionMiddleware>();
             services.AddExceptionHandler<ForbiddenExceptionMiddleware>();
             services.AddExceptionHandler<AlreadyExistExceptionMiddleware>();
@@ -128,7 +129,7 @@ namespace Lotto.WebApi.Extensions
             });
         }
 
-         public static void ConfigureSwagger(this IServiceCollection services)
+        public static void ConfigureSwagger(this IServiceCollection services)
     {
         services.AddSwaggerGen(setup =>
         {

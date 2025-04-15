@@ -11,7 +11,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<User> UserRepository { get; }
     IRepository<Asset> AssetRepository { get; }
     IRepository<Advertisement> AdvertisementRepository { get; }
-    IRepository<AdvertisementView> AdvertisementViewRepository { get; }
+    IRepository<Announcement> AnnouncementRepository { get; }
     IRepository<Football> FootballRepository { get; }
     IRepository<FootballResult> FootballResultRepository { get; }
     IRepository<Number> NumberRepository { get; }

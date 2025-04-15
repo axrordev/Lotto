@@ -13,6 +13,8 @@ public class User : Auditable
     public UserRole Role { get; set; }
     public decimal Balance { get; set; }
     public bool IsBlocked { get; set; }
+    
+    // 🔥 Cooldownni tekshirish uchun kerak
     public DateTime? LastCommentTime { get; set; }
     public ICollection<PlayFootball> PlayFootballs { get; set; }
     public ICollection<PlayNumber> PlayNumbers { get; set; }

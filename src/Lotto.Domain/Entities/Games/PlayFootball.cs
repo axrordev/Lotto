@@ -10,7 +10,6 @@ public class PlayFootball : Auditable
     public long FootballId { get; set; }
     public Football Football { get; set; }
     public int GoalTime { get; set; }
+    public string ScoringPlayer { get; set; }
     public bool IsWinner { get; set; }
-    public int AttemptsLeft { get; set; } = 1; 
-    public int AdsWatched { get; set; } = 0;
 }

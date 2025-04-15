@@ -1,4 +1,5 @@
 using Lotto.Data.DbContexts;
+using Lotto.Service.Helpers;
 using Lotto.WebApi.Extensions;
 using Lotto.WebApi.MapperConfig;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,8 @@ if (!Directory.Exists(wwwrootPath))
 {
     Directory.CreateDirectory(wwwrootPath);
 }
+FilePathHelper.WwwrootPath = wwwrootPath;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +49,10 @@ builder.Services.AddValidators();
 // Swagger konfiguratsiyasi va xizmatlari
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations(); // Enables support for [SwaggerSchema]
+});
 
 // Xatolikni boshqarish (Exception middleware'lari)
 builder.Services.AddExceptions();
@@ -68,6 +75,7 @@ builder.Services.AddCors(options =>
 
 // Ilovani yaratish
 var app = builder.Build();
+
 
 // CORS siyosatini ishlatish
 app.UseCors("AllowSpecificOrigin");

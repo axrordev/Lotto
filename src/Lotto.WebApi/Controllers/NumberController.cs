@@ -1,6 +1,8 @@
 ﻿using Lotto.WebApi.ApiServices.Numbers;
 using Lotto.WebApi.Models.Commons;
 using Lotto.WebApi.Models.Numbers;
+using Lotto.WebApi.Models.PlayNumbers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
@@ -11,14 +13,54 @@ namespace Lotto.WebApi.Controllers
     public class NumberController(INumberApiService numberApiService) : BaseController
     {
         [HttpPost]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync([FromBody] NumberCreateModel model)
         {
             var createdNumber = await numberApiService.CreateAsync(model);
             return Ok(new Response
             {
-                StatusCode = 201,
+                StatusCode = 200,
                 Message = "Number muvaffaqiyatli yaratildi!",
                 Data = createdNumber
+            });
+        }
+
+        [HttpPost("play")]
+        //[Authorize]
+        public async Task<IActionResult> PlayAsync([FromBody] PlayNumberCreateModel model)
+        {
+            var createdPlayNumber = await numberApiService.PlayAsync(model);
+            return Ok(new Response
+                {
+                    StatusCode = 200,
+                    Message = "Successfully participated in the game!",
+                    Data = createdPlayNumber
+                });
+        }
+
+        [HttpPost("{id}/announce-results")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AnnounceResultsAsync(long id)
+        {
+            await numberApiService.AnnounceResultsAsync(id);
+            return Ok(new Response
+            {
+                StatusCode = 200,
+                Message = "Natijalar e'lon qilindi!",
+                Data = null
+            });
+        }
+
+        [HttpGet("my-plays/{userId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetUserPlaysAsync(long userId)
+        {
+            var plays = await numberApiService.GetUserPlaysAsync(userId);
+            return Ok(new Response
+            {
+                StatusCode = 200,
+                Message = "Sizning o‘yinlaringiz olindi!",
+                Data = plays
             });
         }
 

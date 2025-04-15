@@ -11,21 +11,10 @@ namespace Lotto.WebApi.ApiServices.Advertisements
 {
     public class AdvertisementApiService(IAdvertisementService advertisementService, IMapper mapper) : IAdvertisementApiService
     {
-        //public async ValueTask<string> UploadFileAsync(IFormFile file)
-        //{
-        //    var uploadAd = await advertisementService.UploadFileAsync(file);
-        //    return uploadAd;
-        //}
-
         public async ValueTask<AdvertisementViewModel> CreateAsync(AdvertisementCreateModel createModel, IFormFile file)
         {
             var createdAd = await advertisementService.CreateAsync(mapper.Map<Advertisement>(createModel), file);
             return mapper.Map<AdvertisementViewModel>(createdAd);
-        }
-
-        public async ValueTask LogAdvertisementViewASync(long userId, long adId)
-        {
-            await advertisementService.LogAdvertisementViewASync(userId, adId);
         }
 
         public async ValueTask<bool> DeleteAsync(long id)
@@ -49,6 +38,11 @@ namespace Lotto.WebApi.ApiServices.Advertisements
         {
             var updatedAd = await advertisementService.UpdateAsync(id, mapper.Map<Advertisement>(updateModel));
             return mapper.Map<AdvertisementViewModel>(updatedAd);
+        }
+
+        public async ValueTask UpdateExpiredAdvertisementsAsync()
+        {
+            await advertisementService.UpdateExpiredAdvertisementsAsync();
         }
     }
 }

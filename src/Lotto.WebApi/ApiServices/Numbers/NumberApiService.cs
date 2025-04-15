@@ -2,6 +2,7 @@
 using Lotto.Domain.Entities.Games;
 using Lotto.Service.Configurations;
 using Lotto.WebApi.Models.Numbers;
+using Lotto.WebApi.Models.PlayNumbers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,8 +12,32 @@ namespace Lotto.WebApi.ApiServices.Numbers
     {
         public async ValueTask<NumberViewModel> CreateAsync(NumberCreateModel createModel)
         {
-            var createdNumber = await numberService.CreateAsync(mapper.Map<Number>(createModel));
-            return  mapper.Map<NumberViewModel>(createdNumber);
+            var number = new Number
+            {
+                Deadline = createModel.Deadline,
+                Amount = createModel.Amount,
+                IsCompleted = false
+            };
+            var createdNumber = await numberService.CreateAsync(number, createModel.WinningNumbers);
+            return mapper.Map<NumberViewModel>(createdNumber);
+        }
+
+        public async ValueTask<PlayNumberViewModel> PlayAsync(PlayNumberCreateModel createModel)
+        {
+            var playNumber = mapper.Map<PlayNumber>(createModel);
+            var createdPlayNumber = await numberService.PlayAsync(playNumber);
+            return mapper.Map<PlayNumberViewModel>(createdPlayNumber);
+        }
+
+        public async ValueTask AnnounceResultsAsync(long numberId)
+        {
+            await numberService.AnnounceResultsAsync(numberId);
+        }
+
+        public async ValueTask<IEnumerable<PlayNumberViewModel>> GetUserPlaysAsync(long userId)
+        {
+            var plays = await numberService.GetUserPlaysAsync(userId);
+            return mapper.Map<IEnumerable<PlayNumberViewModel>>(plays);
         }
 
         public async ValueTask<bool> DeleteAsync(long id)

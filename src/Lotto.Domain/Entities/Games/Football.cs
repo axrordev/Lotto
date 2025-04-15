@@ -8,6 +8,7 @@ public class Football : Auditable
     public string HomeTeam { get; set; }
     public string AwayTeam { get; set; }
     public DateTime MatchDay { get; set; }
+    public string? FootballInfo { get; set; }
     public decimal Amount { get; set; }
     public bool IsCompleted { get; set; }
 }

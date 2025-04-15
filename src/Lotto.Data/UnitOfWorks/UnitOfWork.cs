@@ -14,7 +14,7 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     public IRepository<User> UserRepository { get; } = new Repository<User>(context);
     public IRepository<Asset> AssetRepository { get; } = new Repository<Asset>(context);
     public IRepository<Advertisement> AdvertisementRepository { get; } = new Repository<Advertisement>(context);
-    public IRepository<AdvertisementView> AdvertisementViewRepository { get; } = new Repository<AdvertisementView>(context);
+    public IRepository<Announcement> AnnouncementRepository { get; } = new Repository<Announcement>(context);
     public IRepository<Football> FootballRepository { get; } = new Repository<Football>(context);
     public IRepository<FootballResult> FootballResultRepository { get; } = new Repository<FootballResult>(context);
     public IRepository<Number> NumberRepository { get; } = new Repository<Number>(context);

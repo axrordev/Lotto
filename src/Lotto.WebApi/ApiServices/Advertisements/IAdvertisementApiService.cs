@@ -11,8 +11,8 @@ public interface IAdvertisementApiService
 {
     //ValueTask<string> UploadFileAsync(IFormFile file);
     ValueTask<AdvertisementViewModel> CreateAsync(AdvertisementCreateModel createModel, IFormFile file);
-    ValueTask LogAdvertisementViewASync(long userId, long adId);
     ValueTask<AdvertisementViewModel> UpdateAsync(long id, AdvertisementUpdateModel updateModel);
+    ValueTask UpdateExpiredAdvertisementsAsync();
     ValueTask<bool> DeleteAsync(long id);
     ValueTask<AdvertisementViewModel> GetByIdAsync(long id);
     ValueTask<IEnumerable<AdvertisementViewModel>> GetAllAsync(PaginationParams @params, Filter filter);
