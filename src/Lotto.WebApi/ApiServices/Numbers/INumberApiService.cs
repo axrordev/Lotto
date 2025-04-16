@@ -10,8 +10,8 @@ namespace Lotto.WebApi.ApiServices.Numbers
     {
         ValueTask<NumberViewModel> CreateAsync(NumberCreateModel createModel);
         ValueTask<PlayNumberViewModel> PlayAsync(PlayNumberCreateModel createModel);
-        ValueTask AnnounceResultsAsync(long numberId);
         ValueTask<IEnumerable<PlayNumberViewModel>> GetUserPlaysAsync(long userId);
+        ValueTask SetWinningNumbersAsync(SetWinningNumbersModel model);
 
         ValueTask<NumberViewModel> UpdateAsync(long id, NumberUpdateModel updateModel);
         ValueTask<bool> DeleteAsync(long id);

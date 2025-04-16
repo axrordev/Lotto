@@ -4,6 +4,7 @@ using Lotto.WebApi.Models.Numbers;
 using Lotto.WebApi.Models.PlayNumbers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,55 +14,133 @@ namespace Lotto.WebApi.Controllers
     public class NumberController(INumberApiService numberApiService) : BaseController
     {
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateAsync([FromBody] NumberCreateModel model)
         {
-            var createdNumber = await numberApiService.CreateAsync(model);
-            return Ok(new Response
+            try
             {
-                StatusCode = 200,
-                Message = "Number muvaffaqiyatli yaratildi!",
-                Data = createdNumber
-            });
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new Response
+                    {
+                        StatusCode = 400,
+                        Message = "Invalid input data.",
+                        Data = ModelState
+                    });
+                }
+
+                var createdNumber = await numberApiService.CreateAsync(model);
+                return Ok(new Response
+                {
+                    StatusCode = 200,
+                    Message = "Number game created successfully!",
+                    Data = createdNumber
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response
+                {
+                    StatusCode = 500,
+                    Message = $"Error creating number game: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPost("play")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> PlayAsync([FromBody] PlayNumberCreateModel model)
         {
-            var createdPlayNumber = await numberApiService.PlayAsync(model);
-            return Ok(new Response
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new Response
+                    {
+                        StatusCode = 400,
+                        Message = "Invalid input data.",
+                        Data = ModelState
+                    });
+                }
+
+                var createdPlayNumber = await numberApiService.PlayAsync(model);
+                return Ok(new Response
                 {
                     StatusCode = 200,
-                    Message = "Successfully participated in the game!",
+                    Message = "Successfully participated in the number game!",
                     Data = createdPlayNumber
                 });
-        }
-
-        [HttpPost("{id}/announce-results")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AnnounceResultsAsync(long id)
-        {
-            await numberApiService.AnnounceResultsAsync(id);
-            return Ok(new Response
+            }
+            catch (Exception ex)
             {
-                StatusCode = 200,
-                Message = "Natijalar e'lon qilindi!",
-                Data = null
-            });
+                return StatusCode(500, new Response
+                {
+                    StatusCode = 500,
+                    Message = $"Error playing number game: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpGet("my-plays/{userId}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetUserPlaysAsync(long userId)
         {
-            var plays = await numberApiService.GetUserPlaysAsync(userId);
-            return Ok(new Response
+            try
             {
-                StatusCode = 200,
-                Message = "Sizning o‘yinlaringiz olindi!",
-                Data = plays
-            });
+                var plays = await numberApiService.GetUserPlaysAsync(userId);
+                return Ok(new Response
+                {
+                    StatusCode = 200,
+                    Message = "User plays retrieved successfully!",
+                    Data = plays
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response
+                {
+                    StatusCode = 500,
+                    Message = $"Error retrieving user plays: {ex.Message}",
+                    Data = null
+                });
+            }
+        }
+
+        [HttpPost("set-winning-numbers")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> SetWinningNumbersAsync([FromBody] SetWinningNumbersModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new Response
+                    {
+                        StatusCode = 400,
+                        Message = "Invalid input data.",
+                        Data = ModelState
+                    });
+                }
+
+                await numberApiService.SetWinningNumbersAsync(model);
+                return Ok(new Response
+                {
+                    StatusCode = 200,
+                    Message = "Winning numbers set successfully!",
+                    Data = null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response
+                {
+                    StatusCode = 500,
+                    Message = $"Error setting winning numbers: {ex.Message}",
+                    Data = null
+                });
+            }
         }
 
         [HttpPut("{id}")]
@@ -112,30 +191,6 @@ namespace Lotto.WebApi.Controllers
                 Message = "Hamma numberlar olindi!",
                 Data = numbers
             });
-        }
-
-        [HttpGet("{gameId}/download")]
-        public async Task<IActionResult> DownloadWinningNumbers(long gameId)
-        {
-            string folderPath = Path.Combine("wwwroot", "archives");
-            string zipPath = Path.Combine(folderPath, gameId + ".zip.enc");
-
-            if (!System.IO.File.Exists(zipPath))
-                return NotFound(new Response
-                {
-                    StatusCode = 404,
-                    Message = "ZIP fayl topilmadi!",
-                    Data = null
-                });
-
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(zipPath, FileMode.Open, FileAccess.Read))
-            {
-                await stream.CopyToAsync(memory);
-            }
-            memory.Position = 0;
-
-            return File(memory, "application/octet-stream", $"{gameId}.zip.enc");
-        }
+        }  
     }
 }

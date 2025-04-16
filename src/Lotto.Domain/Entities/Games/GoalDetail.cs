@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lotto.Domain.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Lotto.Domain.Entities.Games
 {
-    public class GoalDetail
+    public class GoalDetail : Auditable
     {
         public int GoalTime { get; set; }
         public string ScoringPlayer { get; set; }

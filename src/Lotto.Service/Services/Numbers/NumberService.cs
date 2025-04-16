@@ -6,211 +6,139 @@ using Lotto.Service.Exceptions;
 using Lotto.Service.Extensions;
 using Lotto.Service.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 
 public class NumberService(IUnitOfWork unitOfWork) : INumberService
 {
-    private readonly string wwwRootPath;
-    //public async ValueTask<Number> CreateAsync(Number number)
-    //{
-    //    // Create the number
-    //    var createdNumber = await unitOfWork.NumberRepository.InsertAsync(number);
-    //    await unitOfWork.SaveAsync();
+    public async ValueTask<Number> CreateAsync(Number number)
+        {
+            try
+            {
+                if (number.Deadline <= DateTime.UtcNow)
+                    throw new ArgumentException("Deadline must be in the future.");
+                if (number.Amount <= 0)
+                    throw new ArgumentException("Amount must be greater than 0.");
 
-    //    // Generate the zip file
-    //    string zipPath = ZipService.CreateWinningNumbersArchive(createdNumber.Id, createdNumber.WinningNumbers);
+                number.IsCompleted = false;
 
-    //    // Create an announcement
-    //    var announcement = new Announcement
-    //    {
-    //        Title = "New Winning Numbers Available",
-    //        Message = $"The winning numbers for game {createdNumber.Id} are available for download. [Download Here]({zipPath})",
-    //        ExpiryDate = DateTime.UtcNow.AddDays(7), // Set expiry date for the announcement
-    //        IsActive = true
-    //    };
+                var createdNumber = await unitOfWork.NumberRepository.InsertAsync(number);
+                await unitOfWork.SaveAsync();
 
-    //    await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
-    //    await unitOfWork.SaveAsync();
-
-    //    return createdNumber;
-    //}
-    
-    public async ValueTask<Number> CreateAsync(Number number, int[] winningNumbers)
-    {
-        //try
-        //{
-        //    // WinningNumbers ni tekshirish
-        //    if (winningNumbers == null || winningNumbers.Length != 5)
-        //        throw new ArgumentException("Winning numbers must contain exactly 5 numbers.");
-
-        //    var number = new Number
-        //    {
-        //        Deadline = model.Deadline,
-        //        Amount = model.Amount,
-        //        IsCompleted = false
-        //    };
-
-        //    // WinningNumbers ni hash qilish
-        //    number.WinningNumbersHash = HashService.GenerateHash(winningNumbers);
-
-        //    // WinningNumbers ni shifrlash
-        //    number.EncryptedWinningNumbers = EncryptionService.Encrypt(winningNumbers);
-
-        //    // Number ni saqlash
-        //    var createdNumber = await unitOfWork.NumberRepository.InsertAsync(number);
-        //    await unitOfWork.SaveAsync();
-
-        //    // E'lon yaratish
-        //    var announcement = new Announcement
-        //    {
-        //        Title = "New Game Created",
-        //        Message = $"Game {createdNumber.Id} hash: {createdNumber.WinningNumbersHash}. Deadline: {createdNumber.Deadline}.",
-        //        ExpiryDate = DateTime.UtcNow.AddDays(7),
-        //        IsActive = true
-        //    };
-
-        //    await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
-        //    await unitOfWork.SaveAsync();
-
-        //    return createdNumber;
-        //}
-        //catch (Exception ex)
-        //{
-        //    throw new Exception($"Failed to create number: {ex.Message}", ex);
-        //}
-         number.WinningNumbersHash = HashService.GenerateHash(winningNumbers);
-     number.EncryptedWinningNumbers = EncryptionService.Encrypt(winningNumbers);
-     var createdNumber = await unitOfWork.NumberRepository.InsertAsync(number);
-     await unitOfWork.SaveAsync();
-
-     var announcement = new Announcement
-     {
-         Title = "New Game Created",
-         Message = $"Game {createdNumber.Id} hash: {createdNumber.WinningNumbersHash}. Deadline: {createdNumber.Deadline}.",
-         ExpiryDate = DateTime.UtcNow.AddDays(7),
-         IsActive = true
-     };
-     await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
-     await unitOfWork.SaveAsync();
-
-     return createdNumber;
-    }
+                return createdNumber;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to create game: {ex.Message}", ex);
+            }
+        }
 
     public async ValueTask<PlayNumber> PlayAsync(PlayNumber model)
-    {
-        try
         {
-            // Number ni tekshirish
-            var number = await unitOfWork.NumberRepository.SelectAsync(n => n.Id == model.NumberId);
-            if (number == null)
-                throw new NotFoundException("Game not found.");
-
-            if (DateTime.UtcNow > number.Deadline)
-                throw new Exception("Game is already completed. You cannot participate.");
-
-            // SelectedNumbers ni tekshirish
-            if (model.SelectedNumbers == null || model.SelectedNumbers.Length != 5)
-                throw new ArgumentException("You must select exactly 5 numbers.");
-
-
-            var playNumber = new PlayNumber
+            try
             {
-                UserId = model.UserId,
-                NumberId = model.NumberId,
-                SelectedNumbers = model.SelectedNumbers,
-                IsWinner = false
-            };
+                var number = await unitOfWork.NumberRepository.SelectAsync(n => n.Id == model.NumberId);
+                if (number == null)
+                    throw new NotFoundException("Game not found.");
 
-            // PlayNumber ni saqlash
-            var createdPlayNumber = await unitOfWork.PlayNumberRepository.InsertAsync(playNumber);
-            await unitOfWork.SaveAsync();
+                if (DateTime.UtcNow > number.Deadline)
+                    throw new Exception("Game is already completed. You cannot participate.");
 
-            return createdPlayNumber;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to play game: {ex.Message}", ex);
-        }
-    }
+                if (model.SelectedNumbers == null || model.SelectedNumbers.Length != 5)
+                    throw new ArgumentException("You must select exactly 5 numbers.");
 
-    public async ValueTask AnnounceResultsAsync(long numberId)
-    {
-        try
-        {
-            // Number ni olish
-            var number = await unitOfWork.NumberRepository.SelectAsync(n => n.Id == numberId);
-            if (number == null)
-                throw new NotFoundException("Game not found.");
+                foreach (var num in model.SelectedNumbers)
+                {
+                    if (num < 1 || num > 45)
+                        throw new ArgumentException($"All numbers must be between 1 and 45. Invalid number: {num}");
+                }
 
-            // Deadline ni tekshirish
-            if (DateTime.UtcNow < number.Deadline)
-                throw new Exception("Game is not yet completed. Please wait until the deadline.");
+                if (model.SelectedNumbers.Distinct().Count() != model.SelectedNumbers.Length)
+                    throw new ArgumentException("Numbers must be unique.");
 
-            // IsCompleted ni yangilash
-            if (!number.IsCompleted)
-            {
-                number.IsCompleted = true;
-                await unitOfWork.NumberRepository.UpdateAsync(number);
+                var playNumber = new PlayNumber
+                {
+                    UserId = model.UserId,
+                    NumberId = model.NumberId,
+                    SelectedNumbers = model.SelectedNumbers,
+                    IsWinner = false
+                };
+
+                var createdPlayNumber = await unitOfWork.PlayNumberRepository.InsertAsync(playNumber);
                 await unitOfWork.SaveAsync();
+
+                return createdPlayNumber;
             }
-
-            // Shifrlangan WinningNumbers ni ochish
-            var winningNumbers = EncryptionService.Decrypt(number.EncryptedWinningNumbers);
-
-            // Hash ni tekshirish (qo'shimcha xavfsizlik uchun)
-            if (!HashService.VerifyHash(winningNumbers, number.WinningNumbersHash))
-                throw new Exception("Decrypted winning numbers do not match the original hash.");
-
-            // Barcha PlayNumber larni olish va IsWinner ni yangilash
-            var playNumbers = await unitOfWork.PlayNumberRepository.SelectAsEnumerableAsync(
-                pn => pn.NumberId == numberId);
-
-            foreach (var playNumber in playNumbers)
+            catch (Exception ex)
             {
-                playNumber.IsWinner = playNumber.SelectedNumbers.SequenceEqual(winningNumbers);
-                await unitOfWork.PlayNumberRepository.UpdateAsync(playNumber);
+                throw new Exception($"Failed to play game: {ex.Message}", ex);
             }
-
-            await unitOfWork.SaveAsync();
-
-            // Natijani e'lon qilish
-            var winners = playNumbers.Where(pn => pn.IsWinner).Select(pn => pn.UserId).ToList();
-            var winnersMessage = winners.Any()
-                ? $"Winners: {string.Join(", ", winners)}"
-                : "No winners this time.";
-
-            var announcement = new Announcement
-            {
-                Title = $"Game {numberId} Results",
-                Message = $"Winning numbers: {string.Join(", ", winningNumbers)}. {winnersMessage}",
-                ExpiryDate = DateTime.UtcNow.AddDays(7),
-                IsActive = true
-            };
-
-            await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
-            await unitOfWork.SaveAsync();
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error announcing results: {ex.Message}", ex);
-        }
-    }
 
     public async ValueTask<List<PlayNumber>> GetUserPlaysAsync(long userId)
-    {
-        try
         {
-            var plays = await unitOfWork.PlayNumberRepository.SelectAsEnumerableAsync(
-                pn => pn.UserId == userId,
-                new[] { nameof(PlayNumber.Number) });
+            try
+            {
+                var plays = await unitOfWork.PlayNumberRepository.SelectAsEnumerableAsync(
+                    pn => pn.UserId == userId,
+                    new[] { nameof(PlayNumber.Number) });
 
-            return plays.ToList();
+                return plays.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving user plays: {ex.Message}", ex);
+            }
         }
-        catch (Exception ex)
+
+    public async ValueTask SetWinningNumbersAsync(long numberId, int[] winningNumbers)
         {
-            throw new Exception($"Error retrieving user plays: {ex.Message}", ex);
+            try
+            {
+                var number = await unitOfWork.NumberRepository.SelectAsync(n => n.Id == numberId);
+                if (number == null)
+                    throw new NotFoundException("Game not found.");
+
+                if (DateTime.UtcNow < number.Deadline)
+                    throw new Exception("Game is not yet completed. Please wait until the deadline.");
+
+                if (number.IsCompleted)
+                    throw new Exception("Winning numbers have already been set for this game.");
+
+                if (winningNumbers == null || winningNumbers.Length != 5)
+                    throw new ArgumentException("You must provide exactly 5 winning numbers.");
+
+                foreach (var num in winningNumbers)
+                {
+                    if (num < 1 || num > 45)
+                        throw new ArgumentException($"All winning numbers must be between 1 and 45. Invalid number: {num}");
+                }
+
+                if (winningNumbers.Distinct().Count() != winningNumbers.Length)
+                    throw new ArgumentException("Winning numbers must be unique.");
+
+                number.WinningNumbers = winningNumbers;
+                number.IsCompleted = true;
+
+                await unitOfWork.NumberRepository.UpdateAsync(number);
+                await unitOfWork.SaveAsync();
+
+                var playNumbers = await unitOfWork.PlayNumberRepository.SelectAsEnumerableAsync(
+                    pn => pn.NumberId == numberId);
+
+                foreach (var playNumber in playNumbers)
+                {
+                    playNumber.IsWinner = playNumber.SelectedNumbers.SequenceEqual(winningNumbers);
+                    await unitOfWork.PlayNumberRepository.UpdateAsync(playNumber);
+                }
+
+                await unitOfWork.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error setting winning numbers: {ex.Message}", ex);
+            }
         }
-    }
 
     public async ValueTask<Number> UpdateAsync(long id, Number number)
     {

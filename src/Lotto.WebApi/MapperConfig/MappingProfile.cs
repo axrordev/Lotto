@@ -38,14 +38,8 @@ namespace Lotto.WebApi.MapperConfig
 
 
             // Number
+            CreateMap<NumberCreateModel, Number>();
             CreateMap<Number, NumberViewModel>();
-            CreateMap<NumberUpdateModel, Number>();
-
-            CreateMap<NumberCreateModel, Number>()
-                .ForMember(dest => dest.Deadline, opt => opt.MapFrom(src => src.Deadline))
-                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
-                .ForMember(dest => dest.IsCompleted, opt => opt.Ignore());
-
             CreateMap<PlayNumberCreateModel, PlayNumber>();
             CreateMap<PlayNumber, PlayNumberViewModel>();
 

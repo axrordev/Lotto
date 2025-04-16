@@ -7,36 +7,27 @@ using System.Threading.Tasks;
 
 namespace Lotto.WebApi.ApiServices.Footballs
 {
-public class FootballApiService : IFootballApiService
+public class FootballApiService(IFootballService _footballService, IMapper mapper) : IFootballApiService
     {
-        private readonly IFootballService _footballService;
-        private readonly IMapper _mapper;
-
-        public FootballApiService(IFootballService footballService, IMapper mapper)
-        {
-            _footballService = footballService;
-            _mapper = mapper;
-        }
-
         public async ValueTask<FootballViewModel> CreateAsync(FootballCreateModel createModel)
         {
-            var football = _mapper.Map<Football>(createModel);
+            var football = mapper.Map<Football>(createModel);
             var createdFootball = await _footballService.CreateAsync(football);
-            return _mapper.Map<FootballViewModel>(createdFootball);
+            return mapper.Map<FootballViewModel>(createdFootball);
         }
 
         public async ValueTask<PlayFootballViewModel> PlayAsync(PlayFootballCreateModel createModel)
         {
-            var playFootball = _mapper.Map<PlayFootball>(createModel);
+            var playFootball = mapper.Map<PlayFootball>(createModel);
             var createdPlayFootball = await _footballService.PlayAsync(playFootball);
-            return _mapper.Map<PlayFootballViewModel>(createdPlayFootball);
+            return mapper.Map<PlayFootballViewModel>(createdPlayFootball);
         }
 
         public async ValueTask<FootballResultViewModel> AddResultAsync(FootballResultCreateModel createModel)
         {
-            var footballResult = _mapper.Map<FootballResult>(createModel);
+            var footballResult = mapper.Map<FootballResult>(createModel);
             var createdFootballResult = await _footballService.AddResultAsync(footballResult);
-            return _mapper.Map<FootballResultViewModel>(createdFootballResult);
+            return mapper.Map<FootballResultViewModel>(createdFootballResult);
         }
 
         public async ValueTask AnnounceResultsAsync(long footballId)
@@ -47,7 +38,7 @@ public class FootballApiService : IFootballApiService
         public async ValueTask<IEnumerable<PlayFootballViewModel>> GetUserPlaysAsync(long userId)
         {
             var plays = await _footballService.GetUserPlaysAsync(userId);
-            return _mapper.Map<IEnumerable<PlayFootballViewModel>>(plays);
+            return mapper.Map<IEnumerable<PlayFootballViewModel>>(plays);
         }
     }
 }

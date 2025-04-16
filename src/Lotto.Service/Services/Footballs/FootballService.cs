@@ -6,28 +6,8 @@ using Lotto.Service.Exceptions;
 
 namespace Lotto.Service.Services.Footballs;
 
-public class FootballService : IFootballService
+public class FootballService(IUnitOfWork unitOfWork) : IFootballService
     {
-        private readonly IRepository<Football> _footballRepository;
-        private readonly IRepository<PlayFootball> _playFootballRepository;
-        private readonly IRepository<FootballResult> _footballResultRepository;
-        private readonly IRepository<Announcement> _announcementRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public FootballService(
-            IRepository<Football> footballRepository,
-            IRepository<PlayFootball> playFootballRepository,
-            IRepository<FootballResult> footballResultRepository,
-            IRepository<Announcement> announcementRepository,
-            IUnitOfWork unitOfWork)
-        {
-            _footballRepository = footballRepository;
-            _playFootballRepository = playFootballRepository;
-            _footballResultRepository = footballResultRepository;
-            _announcementRepository = announcementRepository;
-            _unitOfWork = unitOfWork;
-        }
-
         public async ValueTask<Football> CreateAsync(Football football)
         {
             try
@@ -39,8 +19,8 @@ public class FootballService : IFootballService
                     throw new ArgumentException("MatchDay must be in the future.");
 
                 football.IsCompleted = false;
-                var createdFootball = await _footballRepository.InsertAsync(football);
-                await _unitOfWork.SaveAsync();
+                var createdFootball = await unitOfWork.FootballRepository.InsertAsync(football);
+                await unitOfWork.SaveAsync();
 
                 var announcement = new Announcement
                 {
@@ -50,8 +30,8 @@ public class FootballService : IFootballService
                     IsActive = true
                 };
 
-                await _announcementRepository.InsertAsync(announcement);
-                await _unitOfWork.SaveAsync();
+                await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
+                await unitOfWork.SaveAsync();
 
                 return createdFootball;
             }
@@ -65,7 +45,7 @@ public class FootballService : IFootballService
         {
             try
             {
-                var football = await _footballRepository.SelectAsync(f => f.Id == playFootball.FootballId);
+                var football = await unitOfWork.FootballRepository.SelectAsync(f => f.Id == playFootball.FootballId);
                 if (football == null)
                     throw new NotFoundException("Football game not found.");
 
@@ -78,8 +58,8 @@ public class FootballService : IFootballService
                 if (string.IsNullOrEmpty(playFootball.ScoringPlayer))
                     throw new ArgumentException("ScoringPlayer is required.");
 
-                var createdPlayFootball = await _playFootballRepository.InsertAsync(playFootball);
-                await _unitOfWork.SaveAsync();
+                var createdPlayFootball = await unitOfWork.PlayFootballRepository.InsertAsync(playFootball);
+                await unitOfWork.SaveAsync();
 
                 return createdPlayFootball;
             }
@@ -93,7 +73,7 @@ public class FootballService : IFootballService
         {
             try
             {
-                var football = await _footballRepository.SelectAsync(f => f.Id == footballResult.FootballId);
+                var football = await unitOfWork.FootballRepository.SelectAsync(f => f.Id == footballResult.FootballId);
                 if (football == null)
                     throw new NotFoundException("Football game not found.");
 
@@ -118,12 +98,12 @@ public class FootballService : IFootballService
                         throw new ArgumentException($"Scoring team must be either {football.HomeTeam} or {football.AwayTeam}.");
                 }
 
-                var createdFootballResult = await _footballResultRepository.InsertAsync(footballResult);
-                await _unitOfWork.SaveAsync();
+                var createdFootballResult = await unitOfWork.FootballResultRepository.InsertAsync(footballResult);
+                await unitOfWork.SaveAsync();
 
                 football.IsCompleted = true;
-                await _footballRepository.UpdateAsync(football);
-                await _unitOfWork.SaveAsync();
+                await unitOfWork.FootballRepository.UpdateAsync(football);
+                await unitOfWork.SaveAsync();
 
                 return createdFootballResult;
             }
@@ -137,21 +117,21 @@ public class FootballService : IFootballService
         {
             try
             {
-                var football = await _footballRepository.SelectAsync(f => f.Id == footballId);
+                var football = await unitOfWork.FootballRepository.SelectAsync(f => f.Id == footballId);
                 if (football == null)
                     throw new NotFoundException("Football game not found.");
 
                 if (!football.IsCompleted)
                     throw new Exception("Football game is not completed yet.");
 
-                var footballResult = await _footballResultRepository.SelectAsync(fr => fr.FootballId == footballId);
+                var footballResult = await unitOfWork.FootballResultRepository.SelectAsync(fr => fr.FootballId == footballId);
                 if (footballResult == null)
                     throw new NotFoundException("Football result not found.");
 
                 if (!footballResult.Goals.Any())
                     throw new Exception("No goals recorded in the football result.");
 
-                var playFootballEntries = await _playFootballRepository.SelectAsEnumerableAsync(
+                var playFootballEntries = await unitOfWork.PlayFootballRepository.SelectAsEnumerableAsync(
                     pf => pf.FootballId == footballId);
 
                 foreach (var playFootball in playFootballEntries)
@@ -160,10 +140,10 @@ public class FootballService : IFootballService
                         playFootball.GoalTime == goal.GoalTime &&
                         playFootball.ScoringPlayer == goal.ScoringPlayer);
 
-                    await _playFootballRepository.UpdateAsync(playFootball);
+                    await unitOfWork.PlayFootballRepository.UpdateAsync(playFootball);
                 }
 
-                await _unitOfWork.SaveAsync();
+                await unitOfWork.SaveAsync();
 
                 var winners = playFootballEntries.Where(pf => pf.IsWinner).Select(pf => pf.UserId).ToList();
                 var winnersMessage = winners.Any()
@@ -181,8 +161,8 @@ public class FootballService : IFootballService
                     IsActive = true
                 };
 
-                await _announcementRepository.InsertAsync(announcement);
-                await _unitOfWork.SaveAsync();
+                await unitOfWork.AnnouncementRepository.InsertAsync(announcement);
+                await unitOfWork.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -194,7 +174,7 @@ public class FootballService : IFootballService
         {
             try
             {
-                var plays = await _playFootballRepository.SelectAsEnumerableAsync(
+                var plays = await unitOfWork.PlayFootballRepository.SelectAsEnumerableAsync(
                     pf => pf.UserId == userId,
                     new[] { nameof(PlayFootball.Football) });
 

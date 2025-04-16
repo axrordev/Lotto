@@ -12,13 +12,8 @@ namespace Lotto.WebApi.ApiServices.Numbers
     {
         public async ValueTask<NumberViewModel> CreateAsync(NumberCreateModel createModel)
         {
-            var number = new Number
-            {
-                Deadline = createModel.Deadline,
-                Amount = createModel.Amount,
-                IsCompleted = false
-            };
-            var createdNumber = await numberService.CreateAsync(number, createModel.WinningNumbers);
+            var number = mapper.Map<Number>(createModel);
+            var createdNumber = await numberService.CreateAsync(number);
             return mapper.Map<NumberViewModel>(createdNumber);
         }
 
@@ -29,16 +24,17 @@ namespace Lotto.WebApi.ApiServices.Numbers
             return mapper.Map<PlayNumberViewModel>(createdPlayNumber);
         }
 
-        public async ValueTask AnnounceResultsAsync(long numberId)
-        {
-            await numberService.AnnounceResultsAsync(numberId);
-        }
-
         public async ValueTask<IEnumerable<PlayNumberViewModel>> GetUserPlaysAsync(long userId)
         {
             var plays = await numberService.GetUserPlaysAsync(userId);
             return mapper.Map<IEnumerable<PlayNumberViewModel>>(plays);
         }
+
+        public async ValueTask SetWinningNumbersAsync(SetWinningNumbersModel model)
+        {
+            await numberService.SetWinningNumbersAsync(model.NumberId, model.WinningNumbers);
+        }
+    
 
         public async ValueTask<bool> DeleteAsync(long id)
         {

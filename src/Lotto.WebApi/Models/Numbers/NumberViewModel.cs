@@ -8,5 +8,6 @@ namespace Lotto.WebApi.Models.Numbers
         public DateTime Deadline { get; set; }
         public decimal Amount { get; set; }
         public bool IsCompleted { get; set; }
+        public int[] WinningNumbers { get; set; }
     }
 }
