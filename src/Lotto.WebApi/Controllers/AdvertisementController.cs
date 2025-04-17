@@ -15,6 +15,7 @@ namespace Lotto.WebApi.Controllers
     public class AdvertisementController(IAdvertisementApiService advertisementApiService) : BaseController
     {
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(
         [FromForm] AdvertisementCreateModel model, 
         IFormFile file)
@@ -56,6 +57,7 @@ namespace Lotto.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Update(long id, [FromBody] AdvertisementUpdateModel model)
         {
             var updatedAdv = await advertisementApiService.UpdateAsync(id, model);
@@ -68,6 +70,7 @@ namespace Lotto.WebApi.Controllers
         }
 
         [HttpPost("update-expired")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateExpiredAdvertisements()
         {
             try
@@ -92,6 +95,7 @@ namespace Lotto.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(long id)
         {
             var isDeleted = await advertisementApiService.DeleteAsync(id);

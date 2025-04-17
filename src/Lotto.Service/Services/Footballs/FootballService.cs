@@ -3,11 +3,14 @@ using Lotto.Data.UnitOfWorks;
 using Lotto.Domain.Entities.Games;
 using Lotto.Domain.Entities;
 using Lotto.Service.Exceptions;
+using Lotto.Service.Configurations;
+using Lotto.Service.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Lotto.Service.Services.Footballs;
 
 public class FootballService(IUnitOfWork unitOfWork) : IFootballService
-    {
+{
         public async ValueTask<Football> CreateAsync(Football football)
         {
             try
@@ -185,4 +188,32 @@ public class FootballService(IUnitOfWork unitOfWork) : IFootballService
                 throw new Exception($"Error retrieving user plays: {ex.Message}", ex);
             }
         }
+
+    public async ValueTask<Football> GetByIdAsync(long id)
+    {
+        var football = await unitOfWork.FootballRepository.SelectAsync(f => f.Id == id);
+        if (football == null)
+            throw new NotFoundException("Football game not found");
+        return football;
     }
+
+    public async ValueTask<List<Football>> GetAllAsync(PaginationParams @params, Filter filter)
+    {
+        var footballs = unitOfWork.FootballRepository
+            .SelectAsQueryable()
+            .OrderBy(filter)
+            .ToPaginateAsQueryable(@params);
+        return await footballs.ToListAsync();
+    }
+
+    public async ValueTask<bool> DeleteAsync(long id)
+    {
+        var football = await unitOfWork.FootballRepository.SelectAsync(f => f.Id == id);
+        if (football == null)
+            throw new NotFoundException("Football game not found");
+
+        await unitOfWork.FootballRepository.DeleteAsync(football);
+        await unitOfWork.SaveAsync();
+        return true;
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -134,8 +133,7 @@ namespace Lotto.Data.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EncryptedWinningNumbers = table.Column<string>(type: "text", nullable: true),
-                    WinningNumbersHash = table.Column<string>(type: "text", nullable: true),
+                    WinningNumbers = table.Column<int[]>(type: "integer[]", nullable: true),
                     Deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -202,7 +200,6 @@ namespace Lotto.Data.Migrations
                     FootballId = table.Column<long>(type: "bigint", nullable: false),
                     HomeTeamScore = table.Column<int>(type: "integer", nullable: false),
                     AwayTeamScore = table.Column<int>(type: "integer", nullable: false),
-                    GoalTimes = table.Column<List<int>>(type: "integer[]", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -288,6 +285,34 @@ namespace Lotto.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GoalDetail",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GoalTime = table.Column<int>(type: "integer", nullable: false),
+                    ScoringPlayer = table.Column<string>(type: "text", nullable: true),
+                    ScoringTeam = table.Column<string>(type: "text", nullable: true),
+                    FootballResultId = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedById = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedById = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedById = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GoalDetail", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GoalDetail_FootballResults_FootballResultId",
+                        column: x => x.FootballResultId,
+                        principalTable: "FootballResults",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
                 {
@@ -323,6 +348,7 @@ namespace Lotto.Data.Migrations
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     FootballId = table.Column<long>(type: "bigint", nullable: false),
                     GoalTime = table.Column<int>(type: "integer", nullable: false),
+                    ScoringPlayer = table.Column<string>(type: "text", nullable: true),
                     IsWinner = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -395,6 +421,11 @@ namespace Lotto.Data.Migrations
                 column: "FootballId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GoalDetail_FootballResultId",
+                table: "GoalDetail",
+                column: "FootballResultId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayFootballs_FootballId",
                 table: "PlayFootballs",
                 column: "FootballId");
@@ -449,7 +480,7 @@ namespace Lotto.Data.Migrations
                 name: "CommentSettings");
 
             migrationBuilder.DropTable(
-                name: "FootballResults");
+                name: "GoalDetail");
 
             migrationBuilder.DropTable(
                 name: "PlayFootballs");
@@ -461,7 +492,7 @@ namespace Lotto.Data.Migrations
                 name: "UserRolePermissions");
 
             migrationBuilder.DropTable(
-                name: "Footballs");
+                name: "FootballResults");
 
             migrationBuilder.DropTable(
                 name: "Numbers");
@@ -471,6 +502,9 @@ namespace Lotto.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permissions");
+
+            migrationBuilder.DropTable(
+                name: "Footballs");
 
             migrationBuilder.DropTable(
                 name: "UsersRoles");

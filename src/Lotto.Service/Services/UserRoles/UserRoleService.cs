@@ -55,6 +55,7 @@ public class UserRoleService(IUnitOfWork unitOfWork) : IUserRoleService
         var pagedUserRoles = userRoles.ToPaginateAsQueryable(@params).OrderBy(filter);
         return await pagedUserRoles.ToListAsync();
     }
+
     public async ValueTask<IEnumerable<UserRole>> GetAllAsync()
     {
         return await unitOfWork.UserRoleRepository.SelectAsEnumerableAsync();

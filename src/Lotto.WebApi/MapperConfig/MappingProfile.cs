@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Lotto.Domain.Entities;
 using Lotto.Domain.Entities.Advertisements;
 using Lotto.Domain.Entities.Games;
 using Lotto.Domain.Entities.Users;
 using Lotto.WebApi.Models.Advertisements;
+using Lotto.WebApi.Models.Comments;
 using Lotto.WebApi.Models.Footballs;
 using Lotto.WebApi.Models.Numbers;
 using Lotto.WebApi.Models.Permissions;
@@ -59,6 +61,11 @@ namespace Lotto.WebApi.MapperConfig
             CreateMap<FootballResult, FootballResultViewModel>();
             CreateMap<GoalDetailCreateModel, GoalDetail>();
             CreateMap<GoalDetail, GoalDetailViewModel>();
+
+
+            CreateMap<CommentCreateModel, Comment>();
+            CreateMap<Comment, CommentViewModel>();
+            CreateMap<CommentUpdateModel, Comment>();
 
         }
     }

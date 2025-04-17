@@ -144,6 +144,7 @@ namespace Lotto.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateAsync(long id, [FromBody] NumberUpdateModel model)
         {
             var updatedNumber = await numberApiService.UpdateAsync(id, model);
@@ -156,6 +157,7 @@ namespace Lotto.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
             var isDeleted = await numberApiService.DeleteAsync(id);

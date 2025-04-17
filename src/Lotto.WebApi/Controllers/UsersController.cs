@@ -12,7 +12,7 @@ namespace Lotto.WebApi.Controllers;
 
 public class UsersController(IUserApiService userApiService) : BaseController
 {
-    [HttpPut("{id:long}")]
+    [HttpPut]
     public async ValueTask<IActionResult> PutAsync(UserUpdateModel updateModel)
     {
         return Ok(new Response
@@ -23,6 +23,7 @@ public class UsersController(IUserApiService userApiService) : BaseController
         });
     }
 
+    [Authorize(Roles = "admin")]
     [HttpDelete("{id:long}")]
     public async ValueTask<IActionResult> DeleteAsync()
     {
@@ -35,16 +36,17 @@ public class UsersController(IUserApiService userApiService) : BaseController
     }
 
     [HttpGet("{id:long}")]
-    public async ValueTask<IActionResult> GetAsync()
+    public async ValueTask<IActionResult> GetAsync(long id)
     {
         return Ok(new Response
         {
             StatusCode = 200,
             Message = "Success",
-            Data = await userApiService.GetAsync(GetUserId)
+            Data = await userApiService.GetAsync(id)
         });
     }
 
+    [Authorize(Roles = "admin")]
     [HttpGet]
     public async ValueTask<IActionResult> GetListAsync(
         [FromQuery] PaginationParams @params,
@@ -58,6 +60,7 @@ public class UsersController(IUserApiService userApiService) : BaseController
         });
     }
 
+    [Authorize]
     [HttpPatch("change-password")]
     public async ValueTask<IActionResult> ChangePasswordAsync(
         string oldPassword,
@@ -72,6 +75,7 @@ public class UsersController(IUserApiService userApiService) : BaseController
         });
     }
 
+    [Authorize(Roles = "admin")]
     [HttpPatch("change-role")]
     public async ValueTask<IActionResult> ChangeRoleAsync(long userId, long roleId)
     {

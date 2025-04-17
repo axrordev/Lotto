@@ -57,8 +57,7 @@ public class PermissionsController(IPermissionApiService permissionApiService) :
     [HttpGet]
     public async ValueTask<IActionResult> GetListAsync(
         [FromQuery] PaginationParams @params,
-        [FromQuery] Filter filter,
-        [FromQuery] string search = null)
+        [FromQuery] Filter filter)
     {
         return Ok(new Response
         {

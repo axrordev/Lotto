@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Lotto.Domain.Entities.Games;
+using Lotto.Service.Configurations;
+using Lotto.Service.Exceptions;
 using Lotto.Service.Services.Footballs;
 using Lotto.WebApi.Models.Footballs;
 using System.Collections.Generic;
@@ -39,6 +41,26 @@ public class FootballApiService(IFootballService _footballService, IMapper mappe
         {
             var plays = await _footballService.GetUserPlaysAsync(userId);
             return mapper.Map<IEnumerable<PlayFootballViewModel>>(plays);
+        }
+
+        public async ValueTask<List<FootballViewModel>> GetAllAsync(PaginationParams @params, Filter filter)
+        {
+            var footballs = await _footballService.GetAllAsync(@params, filter);
+            return mapper.Map<List<FootballViewModel>>(footballs);
+        }
+
+        public async ValueTask<bool> DeleteAsync(long id)
+        {
+            return await _footballService.DeleteAsync(id);
+        }
+
+        public async ValueTask<FootballViewModel> GetByIdAsync(long id)
+        {
+            var football = await _footballService.GetByIdAsync(id);
+            if (football == null)
+            throw new NotFoundException("Football game not found");
+
+            return mapper.Map<FootballViewModel>(football);
         }
     }
 }
