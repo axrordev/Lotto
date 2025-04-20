@@ -27,8 +27,7 @@ public class CommentController( ICommentApiService _commentApiService) : BaseCon
                     });
                 }
 
-                var currentUserId = long.Parse(User.FindFirst("Id")?.Value ?? throw new UnauthorizedAccessException("User ID not found in token."));
-                var createdComment = await _commentApiService.CreateAsync(currentUserId, createModel);
+                var createdComment = await _commentApiService.CreateAsync(GetUserId, createModel);
                 return Ok(new Response
                 {
                     StatusCode = 200,
@@ -62,9 +61,8 @@ public class CommentController( ICommentApiService _commentApiService) : BaseCon
                         Data = ModelState
                     });
                 }
-
-                var currentUserId = long.Parse(User.FindFirst("Id")?.Value ?? throw new UnauthorizedAccessException("User ID not found in token."));
-                var updatedComment = await _commentApiService.UpdateAsync(currentUserId, commentId, updateModel);
+              
+                var updatedComment = await _commentApiService.UpdateAsync(GetUserId, commentId, updateModel);
                 return Ok(new Response
                 {
                     StatusCode = 200,

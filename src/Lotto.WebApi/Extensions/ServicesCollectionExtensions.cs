@@ -31,6 +31,10 @@ using Lotto.WebApi.ApiServices.UserRolePermissions;
 using Microsoft.Extensions.Logging;
 using Lotto.Service.Services.Footballs;
 using Lotto.WebApi.ApiServices.Footballs;
+using Lotto.Service.Services.Comments;
+using Lotto.Service.Services.CommentSettings;
+using Lotto.WebApi.ApiServices.Comments;
+using Lotto.WebApi.ApiServices.CommentServices;
 
 
 namespace Lotto.WebApi.Extensions
@@ -42,6 +46,8 @@ namespace Lotto.WebApi.Extensions
             services.AddScoped<IAdvertisementService, AdvertisementService>();
             services.AddScoped<INumberService, NumberService>();
             services.AddScoped<IFootballService, FootballService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<ICommentSettingService, CommentSettingService>();
 
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
@@ -49,8 +55,6 @@ namespace Lotto.WebApi.Extensions
             services.AddScoped<IUserRoleService, UserRoleService>();
             services.AddScoped<IUserRolePermissionService, UserRolePermissionService>();
 
-           
-   
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
@@ -59,6 +63,8 @@ namespace Lotto.WebApi.Extensions
             services.AddScoped<INumberApiService, NumberApiService>();
             services.AddScoped<IFootballApiService, FootballApiService>();
             services.AddScoped<IAdvertisementApiService, AdvertisementApiService>();
+             services.AddScoped<ICommentApiService, CommentApiService>();
+            services.AddScoped<ICommentSettingApiService, CommentSettingApiService>();
 
             services.AddScoped<IAccountApiService, AccountApiService>();
             services.AddScoped<IUserApiService, UserApiService>();

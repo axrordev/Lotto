@@ -82,7 +82,7 @@ public class CommentService(IUnitOfWork unitOfWork, ICommentSettingService setti
 
     public async ValueTask<Comment> GetByIdAsync(long id)
     {
-        var comment = await unitOfWork.CommentRepository.SelectAsync(c => c.Id == id);
+        var comment = await unitOfWork.CommentRepository.SelectAsync(c => c.Id == id, includes: ["User"]);
         if (comment == null)
             throw new NotFoundException("Comment not found");
 
@@ -92,7 +92,7 @@ public class CommentService(IUnitOfWork unitOfWork, ICommentSettingService setti
     public async ValueTask<IEnumerable<Comment>> GetAllAsync(PaginationParams @params, Filter filter)
     {
        var comments = unitOfWork.CommentRepository
-        .SelectAsQueryable()
+        .SelectAsQueryable(includes: ["User"])
         .OrderBy(filter) 
         .ToPaginateAsQueryable(@params); 
 
